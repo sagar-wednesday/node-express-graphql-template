@@ -3,7 +3,7 @@ import db from '@database/models';
 export const insertAuthor = args => db.books.create(args);
 
 export const updateAuthor = async ({ id, name, country, age }) => {
-  await db.authors.update({ name, country, age }, { where: { id } });
+  const authorRes = await db.authors.update({ name, country, age }, { where: { id }, returning: true });
 
-  return db.authors.findOne({ where: { id } });
+  return authorRes[1][0];
 };
