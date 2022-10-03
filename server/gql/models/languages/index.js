@@ -1,7 +1,8 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
-import { getNode } from '@gql/node';
 import { createConnection } from 'graphql-sequelize';
+import { isEmpty } from 'lodash';
 
+import { getNode } from '@gql/node';
 import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
 import { timestamps } from '../timestamps';
 import db from '@database/models';
@@ -84,17 +85,20 @@ export const customUpdateResolver = async (model, args, context) => {
     };
     const booksLanguagesArgs = args.booksId;
 
-    await updateLanguage({ ...languageArgs });
+    const languageRes = await updateLanguage({ ...languageArgs }, { fetchUpdated: true });
 
     const languageId = args.id;
-    const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
-      languageId,
-      bookId: item.bookId
-    }));
 
-    await updateBooksLanguagesForLanguages(mapBooksLanguagesArgs);
+    if (!isEmpty(booksLanguagesArgs)) {
+      const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
+        languageId,
+        bookId: item.bookId
+      }));
 
-    return languageArgs;
+      await updateBooksLanguagesForLanguages(mapBooksLanguagesArgs);
+    }
+
+    return languageRes;
   } catch (err) {
     throw transformSQLError(err);
   }
