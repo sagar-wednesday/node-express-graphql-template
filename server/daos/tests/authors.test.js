@@ -1,5 +1,5 @@
 import db from '@database/models';
-import { insertAuthor } from '../authors';
+import { insertAuthor, updateAuthor } from '../authors';
 
 describe('Authors dao tests', () => {
   it('should create authors', async () => {
@@ -32,7 +32,10 @@ describe('Authors dao tests', () => {
     };
 
     const mock2 = jest.spyOn(db.authors, 'update');
-    await insertAuthor(authorArgs);
-    expect(mock2).toBeEqual(authorArgs);
+    await updateAuthor(authorArgs);
+
+    const expectedArgs = { age, country, name };
+
+    expect(mock2).toHaveBeenCalledWith(expectedArgs, { where: { id } });
   });
 });
