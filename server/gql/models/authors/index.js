@@ -85,15 +85,20 @@ export const customUpdateResolver = async (model, args, context) => {
       country: args.country,
       age: args.age
     };
-    const authorsBooksArgs = { authorsBooks: args.booksId };
+    const authorsBooksArgs = args.booksId;
 
-    const authorRes = await updateAuthor({ ...authorArgs });
+    await updateAuthor({ ...authorArgs });
 
-    const authorId = authorRes.id;
+    const authorId = args.id;
 
-    await updateAuthorsBooksForAuthors({ ...authorsBooksArgs, authorId });
+    const mapBooksAuthorsArgs = authorsBooksArgs.map((item, index) => ({
+      authorId,
+      bookId: item.bookId
+    }));
 
-    return authorRes;
+    await updateAuthorsBooksForAuthors(mapBooksAuthorsArgs);
+
+    return authorArgs;
   } catch (err) {
     throw transformSQLError(err);
   }

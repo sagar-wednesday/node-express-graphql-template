@@ -4,6 +4,7 @@ import pluralize from 'pluralize';
 import { defaultListArgs, defaultArgs, resolver } from 'graphql-sequelize';
 import { getNode } from '@gql/node';
 import { getGqlModels } from '@server/utils/autogenHelper';
+import { PublisherConnection } from './models/publishers';
 import { logger } from '@server/utils';
 
 const { nodeField, nodeTypeMapper } = getNode();

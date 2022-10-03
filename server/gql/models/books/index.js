@@ -223,8 +223,9 @@ export const customUpdateResolver = async (model, args, context) => {
     const authorsBooksArgs = args.authorsId;
     const booksLanguagesArgs = args.languagesId;
 
-    const bookRes = await updateBook({ ...bookArgs });
-    const bookId = bookRes.id;
+    await updateBook({ ...bookArgs });
+
+    const bookId = args.id;
     const mapAuthorBooksArgs = authorsBooksArgs.map((item, index) => ({
       bookId,
       authorId: item.authorId
@@ -238,7 +239,7 @@ export const customUpdateResolver = async (model, args, context) => {
 
     await updateBooksLanguagesForBooks(mapBooksLanguagesArgs);
 
-    return bookRes;
+    return bookArgs;
   } catch (err) {
     throw transformSQLError(err);
   }
