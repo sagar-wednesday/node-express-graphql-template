@@ -85,9 +85,10 @@ export const customUpdateResolver = async (model, args, context) => {
       country: args.country,
       age: args.age
     };
-
     const authorsBooksArgs = { authorsBooks: args.booksId };
+
     const authorRes = await updateAuthor({ ...authorArgs });
+
     const authorId = authorRes.id;
 
     await updateAuthorsBooksForAuthors({ ...authorsBooksArgs, authorId });
