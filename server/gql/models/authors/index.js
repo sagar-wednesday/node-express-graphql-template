@@ -1,7 +1,8 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
-import { getNode } from '@gql/node';
 import { createConnection } from 'graphql-sequelize';
+import { isEmpty } from 'lodash';
 
+import { getNode } from '@gql/node';
 import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
 import { timestamps } from '../timestamps';
 import db from '@database/models';
@@ -85,12 +86,20 @@ export const customUpdateResolver = async (model, args, context) => {
       country: args.country,
       age: args.age
     };
+    const authorsBooksArgs = args.booksId;
 
-    const authorsBooksArgs = { authorsBooks: args.booksId };
-    const authorRes = await updateAuthor(authorArgs);
-    const authorId = authorRes.id;
+    const authorRes = await updateAuthor({ ...authorArgs }, { fetchUpdated: true });
 
-    await updateAuthorsBooksForAuthors({ ...authorsBooksArgs, authorId });
+    const authorId = args.id;
+
+    if (!isEmpty(authorsBooksArgs)) {
+      const mapBooksAuthorsArgs = authorsBooksArgs.map((item, index) => ({
+        authorId,
+        bookId: item.bookId
+      }));
+
+      await updateAuthorsBooksForAuthors(mapBooksAuthorsArgs);
+    }
 
     return authorRes;
   } catch (err) {

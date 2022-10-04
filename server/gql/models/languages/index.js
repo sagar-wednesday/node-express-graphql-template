@@ -1,13 +1,17 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
-import { getNode } from '@gql/node';
 import { createConnection } from 'graphql-sequelize';
+import { isEmpty } from 'lodash';
 
+import { getNode } from '@gql/node';
 import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
 import { timestamps } from '../timestamps';
 import db from '@database/models';
-import { totalConnectionFields } from '@server/utils';
+import { totalConnectionFields, transformSQLError } from '@server/utils';
 import { sequelizedWhere } from '@server/database/dbUtils';
 import { BookConnection } from '@gql/models/books';
+import { updateLanguage } from '@server/daos/languages';
+import { updateBooksLanguagesForLanguages } from '@server/daos/booksLanguages';
+import { authorsBookFieldsMutation } from '../authorsBooks';
 
 const { nodeInterface } = getNode();
 
@@ -41,7 +45,7 @@ const LanguageConnection = createConnection({
       findOptions.include.push({
         model: db.booksLanguages,
         where: {
-          languageId: context.book.id
+          bookId: context.book.id
         }
       });
     }
@@ -73,8 +77,41 @@ export const languageQueries = {
   model: db.languages
 };
 
+export const customUpdateResolver = async (model, args, context) => {
+  try {
+    const languageArgs = {
+      id: args.id,
+      language: args.language
+    };
+    const booksLanguagesArgs = args.booksId;
+
+    const languageRes = await updateLanguage({ ...languageArgs }, { fetchUpdated: true });
+
+    const languageId = args.id;
+
+    if (!isEmpty(booksLanguagesArgs)) {
+      const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
+        languageId,
+        bookId: item.bookId
+      }));
+
+      await updateBooksLanguagesForLanguages(mapBooksLanguagesArgs);
+    }
+
+    return languageRes;
+  } catch (err) {
+    throw transformSQLError(err);
+  }
+};
+
+export const languageFieldsMutation = {
+  ...languageFields,
+  booksId: authorsBookFieldsMutation.booksIdArray
+};
+
 export const languageMutations = {
-  args: languageFields,
+  args: languageFieldsMutation,
   type: Language,
-  model: db.languages
+  model: db.languages,
+  customUpdateResolver
 };

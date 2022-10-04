@@ -1,5 +1,8 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 import { createConnection } from 'graphql-sequelize';
+import { Op } from 'sequelize';
+import { isEmpty } from 'lodash';
+
 import { getNode } from '@gql/node';
 import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
 import { timestamps } from '../timestamps';
@@ -10,6 +13,8 @@ import { sequelizedWhere } from '@server/database/dbUtils';
 import { insertBook, updateBook } from '@server/daos/books';
 import { insertAuthorsBooks, updateAuthorsBooksForBooks } from '@server/daos/authorsBooks';
 import { authorsBookFieldsMutation } from '@gql/models/authorsBooks';
+import { insertBooksLanguages, updateBooksLanguagesForBooks } from '@server/daos/booksLanguages';
+import { booksLanguageFieldsMutation } from '@gql/models/booksLanguages';
 import { languageQueries } from '@gql/models/languages';
 import { publisherQueries } from '@gql/models/publishers';
 
@@ -53,6 +58,9 @@ const BookConnection = createConnection({
   target: db.books,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
+    findOptions.where = findOptions.where || {};
+    findOptions = addBeforeWhere(findOptions, args, context);
+
     if (context?.author?.id) {
       findOptions.include.push({
         model: db.authorsBooks,
@@ -70,12 +78,61 @@ const BookConnection = createConnection({
         }
       });
     }
+
+    if (context?.publisher?.id) {
+      findOptions.include.push({
+        model: db.publishers,
+        where: {
+          id: context.publisher.id
+        }
+      });
+    }
+
     findOptions.where = sequelizedWhere(findOptions.where, args.where);
 
     return findOptions;
   },
+
   ...totalConnectionFields
 });
+
+const addBeforeWhere = (findOptions, args, context) => {
+  args = { ...args, ...context.parentArgs };
+  findOptions.where = findOptions.where || {};
+
+  if (args.publishers) {
+    findOptions.include.push({
+      model: db.publishers,
+      where: {
+        name: {
+          [Op.iLike]: `%${args.publishers}%`
+        }
+      }
+    });
+  }
+
+  if (args.languages) {
+    findOptions.include.push({
+      model: db.languages,
+      where: {
+        language: {
+          [Op.iLike]: `%${args.languages}%`
+        }
+      }
+    });
+  }
+
+  if (args.genres) {
+    findOptions.where = {
+      ...findOptions.where,
+      genres: {
+        [Op.iLike]: `%${args.genres}%`
+      }
+    };
+  }
+
+  return findOptions;
+};
 
 export { BookConnection, Book };
 
@@ -84,15 +141,33 @@ export const bookQueries = {
   args: {
     id: {
       type: GraphQLNonNull(GraphQLInt)
+    },
+    publishers: {
+      type: GraphQLString
     }
   },
   query: {
-    type: Book
+    type: Book,
+    extras: {
+      before: (findOptions, args, context) => addBeforeWhere(findOptions, args, context)
+    }
   },
   list: {
     ...BookConnection,
+    resolve: BookConnection.resolve,
     type: BookConnection.connectionType,
-    args: BookConnection.connectionArgs
+    args: {
+      ...BookConnection.connectionArgs,
+      publishers: {
+        type: GraphQLString
+      },
+      languages: {
+        type: GraphQLString
+      },
+      genres: {
+        type: GraphQLString
+      }
+    }
   },
   model: db.books
 };
@@ -103,13 +178,25 @@ export const customCreateResolver = async (model, args, context) => {
       name: args.name,
       genres: args.genres,
       pages: args.pages,
-      publishedBy: args.publishedBy
+      publisherId: args.publisherId
     };
+    const authorsBooksArgs = args.authorsId;
+    const booksLanguagesArgs = args.languagesId;
 
-    const authorsBooksArgs = { authorsBooks: args.authorsBooks };
     const bookRes = await insertBook(bookArgs);
+
     const bookId = bookRes.id;
-    await insertAuthorsBooks({ ...authorsBooksArgs, bookId });
+    const mapAuthorBooksArgs = authorsBooksArgs.map((item, index) => ({
+      bookId,
+      authorId: item.authorId
+    }));
+    const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
+      bookId,
+      languageId: item.languageId
+    }));
+
+    await insertAuthorsBooks(mapAuthorBooksArgs);
+    await insertBooksLanguages(mapBooksLanguagesArgs);
 
     return bookRes;
   } catch (err) {
@@ -124,14 +211,32 @@ export const customUpdateResolver = async (model, args, context) => {
       name: args.name,
       genres: args.genres,
       pages: args.pages,
-      publishedBy: args.publishedBy
+      publisherId: args.publisherId
     };
+    const authorsBooksArgs = args.authorsId;
+    const booksLanguagesArgs = args.languagesId;
 
-    const authorsBooksArgs = { authorsBooks: args.authorsId };
-    const bookRes = await updateBook(bookArgs);
-    const bookId = bookRes.id;
+    const bookRes = await updateBook({ ...bookArgs }, { fetchUpdated: true });
 
-    await updateAuthorsBooksForBooks({ ...authorsBooksArgs, bookId });
+    const bookId = args.id;
+
+    if (!isEmpty(authorsBooksArgs)) {
+      const mapAuthorBooksArgs = authorsBooksArgs.map((item, index) => ({
+        bookId,
+        authorId: item.authorId
+      }));
+
+      await updateAuthorsBooksForBooks(mapAuthorBooksArgs);
+    }
+
+    if (!isEmpty(booksLanguagesArgs)) {
+      const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
+        bookId,
+        languageId: item.languageId
+      }));
+
+      await updateBooksLanguagesForBooks(mapBooksLanguagesArgs);
+    }
 
     return bookRes;
   } catch (err) {
@@ -141,7 +246,9 @@ export const customUpdateResolver = async (model, args, context) => {
 
 export const bookFieldsMutation = {
   ...booksFields,
-  authorsId: authorsBookFieldsMutation.authorsIdArray
+  publisherId: { type: GraphQLNonNull(GraphQLID) },
+  authorsId: authorsBookFieldsMutation.authorsIdArray,
+  languagesId: booksLanguageFieldsMutation.languagesIdArray
 };
 
 export const bookMutations = {
