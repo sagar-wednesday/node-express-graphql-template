@@ -4,6 +4,7 @@ import pluralize from 'pluralize';
 import { defaultListArgs, defaultArgs, resolver } from 'graphql-sequelize';
 import { getNode } from '@gql/node';
 import { getGqlModels } from '@server/utils/autogenHelper';
+import { logger } from '@server/utils';
 
 const { nodeField, nodeTypeMapper } = getNode();
 const DB_TABLES = getGqlModels({ type: 'Queries', blacklist: ['aggregate', 'timestamps'] });
@@ -11,6 +12,7 @@ const DB_TABLES = getGqlModels({ type: 'Queries', blacklist: ['aggregate', 'time
 export const addQueries = () => {
   const query = {};
   Object.keys(DB_TABLES).forEach(table => {
+    logger().info(DB_TABLES[table]);
     query[camelCase(table)] = {
       ...DB_TABLES[table].query,
       resolve: resolver(DB_TABLES[table].model),
@@ -35,6 +37,7 @@ export const addQueries = () => {
 };
 
 nodeTypeMapper.mapTypes({});
+
 export const QueryRoot = new GraphQLObjectType({
   name: 'Query',
   node: nodeField,

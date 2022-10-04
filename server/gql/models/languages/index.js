@@ -11,7 +11,7 @@ import { sequelizedWhere } from '@server/database/dbUtils';
 import { BookConnection } from '@gql/models/books';
 import { updateLanguage } from '@server/daos/languages';
 import { updateBooksLanguagesForLanguages } from '@server/daos/booksLanguages';
-import { authorsBookFieldsMutation } from '../authorsBooks';
+import { authorsBookFieldsMutation } from '@gql/models/authorsBooks';
 
 const { nodeInterface } = getNode();
 
