@@ -32,10 +32,10 @@ describe('Authors dao tests', () => {
     };
 
     const mock2 = jest.spyOn(db.authors, 'update');
-    await updateAuthor(authorArgs);
+    await updateAuthor(authorArgs, { fetchUpdated: true });
 
     const expectedArgs = { age, country, name };
 
-    expect(mock2).toHaveBeenCalledWith(expectedArgs, { where: { id } });
+    expect(mock2).toHaveBeenCalledWith(expectedArgs, { where: { id }, returning: true });
   });
 });
