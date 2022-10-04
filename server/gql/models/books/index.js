@@ -41,21 +41,13 @@ const Book = new GraphQLObjectType({
     },
     languages: {
       ...languageQueries.list,
-      resolve: (source, args, context, info) => {
-        if (context.parentArgs.languages) {
-          args.languages = context.parentArgs.languages;
-        }
-        return languageQueries.list.resolve(source, args, { ...context, book: source.dataValues }, info);
-      }
+      resolve: (source, args, context, info) =>
+        languageQueries.list.resolve(source, args, { ...context, book: source.dataValues }, info)
     },
     publishers: {
       ...publisherQueries.list,
-      resolve: (source, args, context, info) => {
-        if (context.parentArgs.publishers) {
-          args.name = context.parentArgs.publishers;
-        }
-        return publisherQueries.list.resolve(source, args, { ...context, book: source.dataValues }, info);
-      }
+      resolve: (source, args, context, info) =>
+        publisherQueries.list.resolve(source, args, { ...context, book: source.dataValues }, info)
     }
   })
 });

@@ -1,12 +1,5 @@
-import { getAllCategories } from '@server/daos/products';
 import moment from 'moment';
-import {
-  getCountByDate,
-  getCountByDateForCategory,
-  getEarliestCreatedDate,
-  getTotalByDate,
-  getTotalByDateForCategory
-} from '@server/daos/purchasedProducts';
+import { getCountByDate, getEarliestCreatedDate, getTotalByDate } from '@server/daos/purchasedProducts';
 import { redis } from '@server/services/redis';
 import { logger } from '@server/utils';
 import { REDIS_IMPLEMENTATION_DATE } from '@server/utils/constants';
@@ -27,7 +20,6 @@ export const aggregateCheck = async () => {
   } else {
     startDate = lastSyncFor;
   }
-  const categories = await getAllCategories();
 
   while (moment(startDate).isBefore(endDate)) {
     const totalForDate = await getTotalByDate(startDate);
@@ -40,18 +32,6 @@ export const aggregateCheck = async () => {
         count: countForDate
       })
     );
-    categories.forEach(async category => {
-      const categoryTotal = await getTotalByDateForCategory(startDate, category);
-      const categoryCount = await getCountByDateForCategory(startDate, category);
-      redis.set(
-        `${formattedDate}_${category}`,
-        JSON.stringify({
-          total: categoryTotal,
-          count: categoryCount
-        })
-      );
-      await redis.set('lastSyncFor', formattedDate);
-    });
     startDate = startDate.add(1, 'day');
   }
 };
