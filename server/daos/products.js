@@ -3,11 +3,6 @@ import Sequelize from 'sequelize';
 import { redis } from '@services/redis';
 import { transformDbArrayResponseToRawResponse } from '@server/utils/transformerUtils';
 
-export const getCategoryById = async id => {
-  const product = await db.products.findOne({ where: { id } });
-  return product.category;
-};
-
 export const getAllCategories = async () => {
   const categoriesFromRedis = await redis.get('categories');
   // add mutation to add category to redis for create product mutation
