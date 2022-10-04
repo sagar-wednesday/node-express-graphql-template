@@ -1,8 +1,8 @@
 import db from '@database/models';
 import { insertLanguage, updateLanguage } from '../languages';
 
-describe('Books dao tests', () => {
-  it('should create books', async () => {
+describe('Languages dao tests', () => {
+  it('should create languages', async () => {
     const language = 'English';
 
     const languageArgs = {
@@ -14,7 +14,7 @@ describe('Books dao tests', () => {
     expect(mock).toHaveBeenCalledWith(languageArgs);
   });
 
-  it('should update books', async () => {
+  it('should update languages', async () => {
     const id = 1;
     const language = 'English';
 
