@@ -1,12 +1,8 @@
 import db from '@database/models';
-import { logger } from '@utils/index';
+import { daosUpdateUtils } from '@server/utils/daosUpdateUtils';
 
 export const insertLanguage = args => db.books.create(args);
 
-export const updateLanguage = async ({ id, language }) => {
-  const languageResponse = await db.languages.update({ language }, { where: { id } });
-
-  logger().info(languageResponse);
-
-  return db.languages.findOne({ where: { id } });
+export const updateLanguage = ({ id, language }, { fetchUpdated }) => {
+  daosUpdateUtils(db.languages, id, { language }, fetchUpdated);
 };

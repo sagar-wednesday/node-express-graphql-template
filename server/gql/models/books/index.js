@@ -1,6 +1,7 @@
 import { GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 import { createConnection } from 'graphql-sequelize';
 import { Op } from 'sequelize';
+import { isEmpty } from 'lodash';
 
 import { getNode } from '@gql/node';
 import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
@@ -223,20 +224,27 @@ export const customUpdateResolver = async (model, args, context) => {
     const authorsBooksArgs = args.authorsId;
     const booksLanguagesArgs = args.languagesId;
 
-    const bookRes = await updateBook({ ...bookArgs });
-    const bookId = bookRes.id;
-    const mapAuthorBooksArgs = authorsBooksArgs.map((item, index) => ({
-      bookId,
-      authorId: item.authorId
-    }));
-    const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
-      bookId,
-      languageId: item.languageId
-    }));
+    const bookRes = await updateBook({ ...bookArgs }, { fetchUpdated: true });
 
-    await updateAuthorsBooksForBooks(mapAuthorBooksArgs);
+    const bookId = args.id;
 
-    await updateBooksLanguagesForBooks(mapBooksLanguagesArgs);
+    if (!isEmpty(authorsBooksArgs)) {
+      const mapAuthorBooksArgs = authorsBooksArgs.map((item, index) => ({
+        bookId,
+        authorId: item.authorId
+      }));
+
+      await updateAuthorsBooksForBooks(mapAuthorBooksArgs);
+    }
+
+    if (!isEmpty(booksLanguagesArgs)) {
+      const mapBooksLanguagesArgs = booksLanguagesArgs.map((item, index) => ({
+        bookId,
+        languageId: item.languageId
+      }));
+
+      await updateBooksLanguagesForBooks(mapBooksLanguagesArgs);
+    }
 
     return bookRes;
   } catch (err) {

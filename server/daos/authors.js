@@ -1,9 +1,7 @@
 import db from '@database/models';
+import { daosUpdateUtils } from '@server/utils/daosUpdateUtils';
 
 export const insertAuthor = args => db.books.create(args);
 
-export const updateAuthor = async ({ id, name, country, age }) => {
-  await db.authors.update({ name, country, age }, { where: { id } });
-
-  return db.authors.findOne({ where: { id } });
-};
+export const updateAuthor = ({ id, name, country, age }, { fetchUpdated }) =>
+  daosUpdateUtils(db.authors, id, { name, country, age }, fetchUpdated);
