@@ -223,7 +223,6 @@ export const customUpdateResolver = async (model, args, context) => {
     };
     const authorsBooksArgs = args.authorsId;
     const booksLanguagesArgs = args.languagesId;
-    console.log('bookres lite');
 
     const bookRes = await updateBook({ ...bookArgs }, { fetchUpdated: true });
 
