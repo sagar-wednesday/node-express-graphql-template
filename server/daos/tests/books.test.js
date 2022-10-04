@@ -2,7 +2,7 @@ import db from '@database/models';
 import { insertBook, updateBook } from '../books';
 
 describe('Authors dao tests', () => {
-  it('should create authors', async () => {
+  it('should create books', async () => {
     const name = 'glitter in sky';
     const genres = 'action';
     const pages = '101';
@@ -20,7 +20,7 @@ describe('Authors dao tests', () => {
     expect(mock).toHaveBeenCalledWith(bookArgs);
   });
 
-  it('should update authors', async () => {
+  it('should update books', async () => {
     const id = 1;
     const name = 'glitter in sky';
     const genres = 'action';
