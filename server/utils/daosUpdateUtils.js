@@ -6,8 +6,7 @@ export const daosUpdateUtils = async (table, id, fieldsToUpdate, fetchUpdated) =
   if (fetchUpdated) {
     options.returning = true;
   }
-
-  const res = await table.update({ ...fieldsToUpdate }, options);
+  const res = await table.update(fieldsToUpdate, options);
 
   let affectedRowData;
 
