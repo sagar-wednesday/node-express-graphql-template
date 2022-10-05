@@ -29,7 +29,7 @@ export const restfulGetResponse = async (path, app) => {
   if (!app) {
     app = await require('@server/utils/testUtils/testApp').testApp;
   }
-  return await request(app)
+  return request(app)
     .get(path)
     .set('Accept', 'application/json');
 };
