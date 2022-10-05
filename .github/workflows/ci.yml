@@ -1,6 +1,6 @@
 name: Node Express GraphQL Template CI
 
-on: [push, pull_request]
+on: pull_request
 
 jobs:
   build_and_test:
