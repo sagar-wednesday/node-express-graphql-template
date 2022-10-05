@@ -1,11 +1,9 @@
-import { aggregateCheck } from '@server/cronJobs/aggregateJob';
 import Bull from 'bull';
 import moment from 'moment';
 const queues = {};
 
 export const QUEUE_NAMES = {
-  SCHEDULED_JOB: 'scheduledJob',
-  AGGREGATE_CHECK: 'aggregateCheck'
+  SCHEDULED_JOB: 'scheduledJob'
 };
 
 export const QUEUE_PROCESSORS = {
@@ -13,11 +11,6 @@ export const QUEUE_PROCESSORS = {
     console.log(`${moment()}::Job with id: ${job.id} is being executed.\n`, {
       message: job.data.message
     });
-    done();
-  },
-  [QUEUE_NAMES.AGGREGATE_CHECK]: (job, done) => {
-    console.log('Aggregate job is getting executed');
-    aggregateCheck();
     done();
   }
 };
