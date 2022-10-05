@@ -31,7 +31,6 @@ jobs:
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORG}}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY}}
-          verbose: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
