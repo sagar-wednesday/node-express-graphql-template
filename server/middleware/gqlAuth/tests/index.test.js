@@ -186,107 +186,107 @@ describe('gqlAuth tests', () => {
       expect(response).toBe(true);
     });
   });
-  describe('isAuthenticated tests', () => {
-    let mocks;
-    beforeEach(() => {
-      const spy = jest.fn();
-      mocks = {
-        next: spy
-      };
-      process.env.ENVIRONMENT_NAME = 'dev';
-      process.env.NODE_ENV = 'dev';
-    });
-    const req = {
-      body: {
-        query: `query Address{
-            address(id:1){
-              id
-            }
-          }
-          `
-      },
-      headers: {}
-    };
+  // describe('isAuthenticated tests', () => {
+  //   let mocks;
+  //   beforeEach(() => {
+  //     const spy = jest.fn();
+  //     mocks = {
+  //       next: spy
+  //     };
+  //     process.env.ENVIRONMENT_NAME = 'dev';
+  //     process.env.NODE_ENV = 'dev';
+  //   });
+  //   const req = {
+  //     body: {
+  //       query: `query Address{
+  //           address(id:1){
+  //             id
+  //           }
+  //         }
+  //         `
+  //     },
+  //     headers: {}
+  //   };
 
-    it('should call next if the environment is test or local ', async () => {
-      process.env.ENVIRONMENT_NAME = 'local';
-      const { isAuthenticated } = require('../index');
-      await isAuthenticated(req, res, mocks.next);
-      expect(mocks.next).toBeCalled();
-    });
-    it('should return an erorr if the access token is missing', async () => {
-      const { isAuthenticated } = require('../index');
-      const response = await isAuthenticated(req, res, mocks.next);
-      expect(response.errors).toEqual('Access Token missing from header');
-    });
+  //   it('should call next if the environment is test or local ', async () => {
+  //     process.env.ENVIRONMENT_NAME = 'local';
+  //     const { isAuthenticated } = require('../index');
+  //     await isAuthenticated(req, res, mocks.next);
+  //     expect(mocks.next).toBeCalled();
+  //   });
+  //   it('should return an erorr if the access token is missing', async () => {
+  //     const { isAuthenticated } = require('../index');
+  //     const response = await isAuthenticated(req, res, mocks.next);
+  //     expect(response.errors).toEqual('Access Token missing from header');
+  //   });
 
-    it('should return an error if the token is invalid', async () => {
-      req.headers.authorization = 'bearer PLPL';
-      const error = 'this is an error';
-      jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
-        cb(new Error(error));
-      });
-      const { isAuthenticated } = require('../index');
-      const response = await isAuthenticated(req, res, mocks.next);
-      expect(response.errors).toEqual([error]);
-    });
+  //   it('should return an error if the token is invalid', async () => {
+  //     req.headers.authorization = 'bearer PLPL';
+  //     const error = 'this is an error';
+  //     jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
+  //       cb(new Error(error));
+  //     });
+  //     const { isAuthenticated } = require('../index');
+  //     const response = await isAuthenticated(req, res, mocks.next);
+  //     expect(response.errors).toEqual([error]);
+  //   });
 
-    it('should call the next middleware without any errors', async () => {
-      req.headers.authorization = 'bearer PLPL';
-      const jwtVerifySpy = jest.fn();
-      jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
-        jwtVerifySpy();
-        cb(null, { user: { id: 1 } });
-      });
-      const { isAuthenticated } = require('../index');
-      await isAuthenticated(req, res, mocks.next);
-      expect(mocks.next).toBeCalled();
-      expect(jwtVerifySpy).toBeCalled();
-    });
+  //   it('should call the next middleware without any errors', async () => {
+  //     req.headers.authorization = 'bearer PLPL';
+  //     const jwtVerifySpy = jest.fn();
+  //     jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
+  //       jwtVerifySpy();
+  //       cb(null, { user: { id: 1 } });
+  //     });
+  //     const { isAuthenticated } = require('../index');
+  //     await isAuthenticated(req, res, mocks.next);
+  //     expect(mocks.next).toBeCalled();
+  //     expect(jwtVerifySpy).toBeCalled();
+  //   });
 
-    it('should return an error if the user is unauthorized', async () => {
-      req.headers.authorization = 'bearer PLPL';
-      const jwtVerifySpy = jest.fn();
-      jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
-        jwtVerifySpy();
-        cb(null, { user: { id: 2 } });
-      });
-      const { isAuthenticated } = require('../index');
-      const query = req.body.query;
-      req.body.query = `query PurchasedProducts{
-          purchasedProducts(limit:10, offset: 1){
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-            }
-            `;
-      const response = await isAuthenticated(req, res, mocks.next);
-      console.log('this is the response', { response });
-      expect(response.errors).toStrictEqual([
-        'Invalid scope to perform this operation. Contact support@wednesday.is for more information.'
-      ]);
-      expect(jwtVerifySpy).toBeCalled();
-      req.body.query = query;
-    });
-    it('should throw an erorr with Internal Server error in case of failure when unhandled error', async () => {
-      const { isAuthenticated } = require('../index');
-      jest.spyOn(require('@utils'), 'isLocalEnv').mockImplementationOnce(() => {
-        throw new Error();
-      });
-      const response = await isAuthenticated(req, res, mocks.next);
-      expect(response.errors).toStrictEqual(['Internal server error']);
-    });
-    it('should throw a custome error in case of unhandled error', async () => {
-      const errMsg = 'this is some error';
-      const { isAuthenticated } = require('../index');
-      jest.spyOn(require('@utils'), 'isLocalEnv').mockImplementationOnce(() => {
-        throw new Error(errMsg);
-      });
-      const response = await isAuthenticated(req, res, mocks.next);
-      expect(response.errors).toStrictEqual([errMsg]);
-    });
-  });
+  //   it('should return an error if the user is unauthorized', async () => {
+  //     req.headers.authorization = 'bearer PLPL';
+  //     const jwtVerifySpy = jest.fn();
+  //     jest.spyOn(require('jsonwebtoken'), 'verify').mockImplementation((_, b, cb) => {
+  //       jwtVerifySpy();
+  //       cb(null, { user: { id: 2 } });
+  //     });
+  //     const { isAuthenticated } = require('../index');
+  //     const query = req.body.query;
+  //     req.body.query = `query PurchasedProducts{
+  //         purchasedProducts(limit:10, offset: 1){
+  //               edges {
+  //                 node {
+  //                   id
+  //                 }
+  //               }
+  //             }
+  //           }
+  //           `;
+  //     const response = await isAuthenticated(req, res, mocks.next);
+  //     console.log('this is the response', { response });
+  //     expect(response.errors).toStrictEqual([
+  //       'Invalid scope to perform this operation. Contact support@wednesday.is for more information.'
+  //     ]);
+  //     expect(jwtVerifySpy).toBeCalled();
+  //     req.body.query = query;
+  //   });
+  //   it('should throw an erorr with Internal Server error in case of failure when unhandled error', async () => {
+  //     const { isAuthenticated } = require('../index');
+  //     jest.spyOn(require('@utils'), 'isLocalEnv').mockImplementationOnce(() => {
+  //       throw new Error();
+  //     });
+  //     const response = await isAuthenticated(req, res, mocks.next);
+  //     expect(response.errors).toStrictEqual(['Internal server error']);
+  //   });
+  //   it('should throw a custome error in case of unhandled error', async () => {
+  //     const errMsg = 'this is some error';
+  //     const { isAuthenticated } = require('../index');
+  //     jest.spyOn(require('@utils'), 'isLocalEnv').mockImplementationOnce(() => {
+  //       throw new Error(errMsg);
+  //     });
+  //     const response = await isAuthenticated(req, res, mocks.next);
+  //     expect(response.errors).toStrictEqual([errMsg]);
+  //   });
+  // });
 });
