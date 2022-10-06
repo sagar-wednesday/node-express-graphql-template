@@ -46,7 +46,7 @@ export const isPublicQuery = async req => {
 export const isAuthenticated = async (req, res, next) => {
   try {
     // For accessing graphql without authentication when debugging.
-    if (req.method.toLowerCase() === 'get') {
+    if (req.method === 'get') {
       next();
       return;
     }
