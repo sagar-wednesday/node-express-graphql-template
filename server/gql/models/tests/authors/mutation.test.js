@@ -1,20 +1,15 @@
 import get from 'lodash/get';
-import { getResponse, mockDBClient, resetAndMockDB } from '@utils/testUtils';
+import { getResponse } from '@utils/testUtils';
 import { authorsTable } from '@utils/testUtils/mockData';
 
 describe('Address graphQL-server-DB mutation tests', () => {
-  let dbClient;
-  const bookId = { bookId: 1 };
-  beforeEach(() => {
-    dbClient = mockDBClient();
-    resetAndMockDB(null, {}, dbClient);
-  });
   const createAuthorMutation = `
     mutation {
-        createAuthor (
+      createAuthor (
           name: "${authorsTable[0].name}",
           country: "${authorsTable[0].country}",
-          age: "${authorsTable[0].age}",
+          age: ${authorsTable[0].age},
+          booksId: [{bookId: 1}]
         ) {
           id
           name
@@ -37,10 +32,11 @@ describe('Address graphQL-server-DB mutation tests', () => {
   const updateAuthorMutation = `
     mutation {
         updateAuthor (
-            id: ${authorsTable[0].id},
-            name: "${authorsTable[0].name}",
-            country: "${authorsTable[0].country}",
-            age: "${authorsTable[0].age}"
+            id: 1,
+            name: "Shaktiman",
+            country: "India",
+            age: 22,
+            booksId: [{bookId: 2}]
         ) {
             id
         }
@@ -53,32 +49,35 @@ describe('Address graphQL-server-DB mutation tests', () => {
     }
   }`;
 
-  // it('should have a mutation to create a new author', async () => {
-  //   jest.spyOn(dbClient.models.authors, 'create');
-  //   const response = await getResponse(createAuthorMutation);
-  //   console.log('createResponse', response);
-  //   const result = get(response, 'body.data.createAuthor');
-  //   console.log('result', result);
-  //   expect(result).toBeTruthy();
-  //   const { id, ...author } = authorsTable[0];
-  //   expect(dbClient.models.authors.create.mock.calls.length).toBe(1);
-  //   expect(dbClient.models.authors.create.mock.calls[0][0]).toEqual({
-  //     ...author
-  //   });
-  // });
+  it('should have a mutation to create a new author', async () => {
+    const response = await getResponse(createAuthorMutation);
+    const result = get(response, 'body.data.createAuthor');
+
+    expect(result).toMatchObject({
+      id: authorsTable[0].id,
+      name: authorsTable[0].name,
+      country: authorsTable[0].country,
+      age: authorsTable[0].age
+    });
+  });
+
+  it('should have a mutation to update a new author', async () => {
+    const response = await getResponse(updateAuthorMutation);
+    const result = get(response, 'body.data.updateAuthor');
+
+    expect(result).toMatchObject({
+      id: '1'
+    });
+  });
 
   it('should have a mutation to delete an author', async () => {
-    jest.spyOn(dbClient.models.authors, 'destroy');
     const response = await getResponse(deleteAuthorMutation);
     const result = get(response, 'body.data.deleteAuthor');
-    console.log('result of delete', result);
-    expect(result).toBeTruthy();
-    expect(dbClient.models.authors.destroy.mock.calls.length).toBe(1);
-    expect(dbClient.models.authors.destroy.mock.calls[0][0]).toEqual({
-      where: {
-        deletedAt: null,
-        id: parseInt(authorsTable[0].id)
-      }
-    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 1
+      })
+    );
   });
 });
