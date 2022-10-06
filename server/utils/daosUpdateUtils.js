@@ -12,7 +12,6 @@ export const daosUpdateUtils = async (table, id, fieldsToUpdate, fetchUpdated) =
     return res;
   }
 
-
   // res = returns an array with one or two elements. The first element is always the number of affected rows, while the second element is the actual affected rows(PostgresSQl only)
   const affectedRow = res[1];
 
