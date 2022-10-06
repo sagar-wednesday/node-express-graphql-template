@@ -2,32 +2,67 @@ import db from '@database/models';
 import { insertLanguage, updateLanguage } from '../languages';
 
 describe('Languages dao tests', () => {
-  it('should create languages', async () => {
-    const language = 'English';
+  const id = 1;
+  const language = 'English';
+  let languageArgs;
 
-    const languageArgs = {
+  beforeEach(() => {
+    languageArgs = {
       language
     };
-
-    const mock = jest.spyOn(db.languages, 'create');
-    await insertLanguage(languageArgs);
-    expect(mock).toHaveBeenCalledWith(languageArgs);
   });
 
-  it('should update languages', async () => {
-    const id = 1;
-    const language = 'English';
+  describe('createLanguage', () => {
+    it('should create languages', async () => {
+      const createLanguageSpy = jest.spyOn(db.languages, 'create');
+      const res = await insertLanguage(languageArgs);
+      expect(createLanguageSpy).toHaveBeenCalledWith(languageArgs);
+      expect(res?.dataValues).toMatchObject({
+        ...languageArgs,
+        id: `${id}`
+      });
+    });
 
-    const languageArgs = {
-      id,
-      language
-    };
+    it('should throw an error if the database is down', async () => {
+      const createLanguageSpy = jest.spyOn(db.languages, 'create');
+      const errorMessage = 'database is down';
+      createLanguageSpy.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+      expect(async () => insertLanguage(languageArgs)).rejects.toThrowError(errorMessage);
+      expect(createLanguageSpy).toHaveBeenCalledWith(languageArgs);
+    });
+  });
 
-    const mock2 = jest.spyOn(db.languages, 'update');
-    await updateLanguage(languageArgs, { fetchUpdated: true });
+  describe('updateLanguage', () => {
+    let updateLanguageSpy;
+    let expectedArgs;
+    beforeEach(() => {
+      updateLanguageSpy = jest.spyOn(db.languages, 'update');
+      expectedArgs = {
+        language
+      };
+    });
 
-    const expectedArgs = { language };
+    it('should update languages when fetchUpdated = true', async () => {
+      const res = await updateLanguage({ ...languageArgs, id }, { fetchUpdated: true });
 
-    expect(mock2).toHaveBeenCalledWith(expectedArgs, { where: { id }, returning: true });
+      expect(updateLanguageSpy).toHaveBeenCalledWith(expectedArgs, {
+        where: { id },
+        returning: true
+      });
+
+      expect(res?.dataValues).toMatchObject({ ...expectedArgs, id: `${id}` });
+    });
+
+    it('should update languages when fetchUpdated = false', async () => {
+      updateLanguageSpy.mockImplementation(() => [1]);
+      const res = await updateLanguage({ ...languageArgs, id });
+
+      expect(updateLanguageSpy).toHaveBeenCalledWith(expectedArgs, {
+        where: { id }
+      });
+      expect(res).toEqual([1]);
+    });
   });
 });

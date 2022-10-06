@@ -40,18 +40,19 @@ describe('Authors dao tests', () => {
 
   describe('updateAuthor', () => {
     let updateAuthorSpy;
+    let expectedArgs;
     beforeEach(() => {
       updateAuthorSpy = jest.spyOn(db.authors, 'update');
-    });
-    it('should update authors when fetchUpdated = true', async () => {
-      const updateAuthorSpy = jest.spyOn(db.authors, 'update');
-      const res = await updateAuthor({ ...authorArgs, id }, { fetchUpdated: true });
-
-      const expectedArgs = {
+      expectedArgs = {
         age,
         country,
         name
       };
+    });
+
+    it('should update authors when fetchUpdated = true', async () => {
+      updateAuthorSpy = jest.spyOn(db.authors, 'update');
+      const res = await updateAuthor({ ...authorArgs, id }, { fetchUpdated: true });
 
       expect(updateAuthorSpy).toHaveBeenCalledWith(expectedArgs, {
         where: { id },
@@ -64,12 +65,6 @@ describe('Authors dao tests', () => {
     it('should update authors when fetchUpdated = false', async () => {
       updateAuthorSpy.mockImplementation(() => [1]);
       const res = await updateAuthor({ ...authorArgs, id });
-
-      const expectedArgs = {
-        age,
-        country,
-        name
-      };
 
       expect(updateAuthorSpy).toHaveBeenCalledWith(expectedArgs, {
         where: { id }
