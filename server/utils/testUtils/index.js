@@ -165,3 +165,5 @@ export const expectSameTypeNameOrKind = (result, expected) =>
     }
     return false;
   }).length === 0;
+
+export const expectSameNameField = result => result.map(field => field.name);
