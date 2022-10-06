@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 import { graphqlSync, GraphQLSchema } from 'graphql';
-import { createFieldsWithType, expectSameTypeNameOrKind } from '@utils/testUtils';
+import { createFieldsWithType, expectSameNameField, expectSameTypeNameOrKind } from '@utils/testUtils';
 import { QueryRoot } from '@server/gql/queries';
 import { MutationRoot } from '@server/gql/mutations';
 import { timestamps } from '@gql/models/timestamps';
@@ -28,9 +28,15 @@ const query = `
   }
 `;
 describe('Language introspection tests', () => {
+  const expectedFields = ['id', 'language', 'createdAt', 'updatedAt', 'deletedAt', 'books'];
   it('should have the correct fields and types', () => {
     const result = graphqlSync({ schema, source: query });
     const languageFieldTypes = get(result, 'data.__type.fields');
+
+    const hasCorrectFields = expectSameNameField(languageFieldTypes);
+
+    expect(hasCorrectFields).toEqual(expectedFields);
+
     const hasCorrectFieldTypes = expectSameTypeNameOrKind(languageFieldTypes, fields);
     expect(hasCorrectFieldTypes).toBeTruthy();
   });
