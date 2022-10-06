@@ -1,10 +1,12 @@
 name: Node Express GraphQL Template CI
 
-on: 
+on:
   push:
-    - develop
+    branches:
+      - develop
   pull_request:
-    - develop
+    branches:
+      - develop
 
 jobs:
   build_and_test:
