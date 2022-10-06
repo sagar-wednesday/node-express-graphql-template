@@ -2,7 +2,7 @@ import get from 'lodash/get';
 import { getResponse, mockDBClient, resetAndMockDB } from '@utils/testUtils';
 import { booksTable } from '@utils/testUtils/mockData';
 
-describe('Address graphQL-server-DB query tests', () => {
+describe('Author graphQL-server-DB query tests', () => {
   const authorId = 1;
   const authorOne = `
     query {
@@ -34,7 +34,7 @@ describe('Address graphQL-server-DB query tests', () => {
       expect(dbClient.models.books.findAll.mock.calls.length).toBe(1);
       // check if books.findAll is being called with the correct whereclause
       expect(dbClient.models.books.findAll.mock.calls[0][0].include[0].where).toEqual({ authorId });
-      // check if the included model has name: addresses
+      // check if the included model has name: authors_books
       expect(dbClient.models.books.findAll.mock.calls[0][0].include[0].model.name).toEqual('authors_books');
     });
   });

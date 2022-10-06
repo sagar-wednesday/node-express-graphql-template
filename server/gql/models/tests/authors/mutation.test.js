@@ -2,7 +2,7 @@ import get from 'lodash/get';
 import { getResponse } from '@utils/testUtils';
 import { authorsTable } from '@utils/testUtils/mockData';
 
-describe('Address graphQL-server-DB mutation tests', () => {
+describe('Author graphQL-server-DB mutation tests', () => {
   const createAuthorMutation = `
     mutation {
       createAuthor (
