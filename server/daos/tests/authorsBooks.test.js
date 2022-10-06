@@ -1,17 +1,13 @@
 import db from '@database/models';
 import { resetAndMockDB } from '@server/utils/testUtils';
 import { insertAuthorsBooks, updateAuthorsBooksForAuthors, updateAuthorsBooksForBooks } from '../authorsBooks';
+import { booksAuthorsArgs } from './mockDaoData';
 
 describe('authorsBooks dao tests', () => {
   describe('createAuthorsBooks', () => {
-    let authorsBooksArgs;
+    let createArgs;
     beforeEach(() => {
-      authorsBooksArgs = [
-        {
-          bookId: 1,
-          authorId: 1
-        }
-      ];
+      createArgs = booksAuthorsArgs.create;
     });
     it('should insertAuthorsBooks called with args and create authorsBooks', async () => {
       let createAuthorsBookSpy;
@@ -22,11 +18,11 @@ describe('authorsBooks dao tests', () => {
 
       const { insertAuthorsBooks } = require('../authorsBooks');
 
-      const res = await insertAuthorsBooks(authorsBooksArgs);
+      const res = await insertAuthorsBooks(createArgs);
 
-      expect(createAuthorsBookSpy).toHaveBeenCalledWith(authorsBooksArgs);
+      expect(createAuthorsBookSpy).toHaveBeenCalledWith(createArgs);
       expect(res).toMatchObject({
-        ...authorsBooksArgs
+        ...createArgs
       });
     });
 
@@ -38,107 +34,79 @@ describe('authorsBooks dao tests', () => {
         throw new Error(errorMessage);
       });
 
-      expect(async () => insertAuthorsBooks(authorsBooksArgs)).rejects.toEqual(new Error(errorMessage));
+      expect(async () => insertAuthorsBooks(createArgs)).rejects.toEqual(new Error(errorMessage));
     });
   });
 
-  describe('updateAuthorsBooks for books', () => {
-    let authorsBooksForBooksArgs;
+  describe('updateAuthorsBooks', () => {
+    let updateArgs;
     beforeEach(() => {
-      authorsBooksForBooksArgs = [
-        {
-          bookId: 1,
-          authorId: 1
-        },
-        {
-          bookId: 1,
-          authorId: 2
-        },
-        {
-          bookId: 2,
-          authorId: 3
-        }
-      ];
-    });
-    it('should have been called with args and update authorsBooks for books', async () => {
-      let authorsBooksForBooksSpy;
-      await resetAndMockDB(db => {
-        authorsBooksForBooksSpy = jest.spyOn(db.models.authors_books, 'bulkCreate');
-      });
-
-      const { updateAuthorsBooksForBooks } = require('../authorsBooks');
-      const res = await updateAuthorsBooksForBooks(authorsBooksForBooksArgs);
-
-      expect(authorsBooksForBooksSpy).toHaveBeenCalledWith(authorsBooksForBooksArgs, {
-        fields: ['id', 'bookId', 'authorId'],
-        updateOnDuplicate: ['bookId']
-      });
-      expect(res).toMatchObject({
-        ...authorsBooksForBooksArgs
-      });
+      updateArgs = booksAuthorsArgs.update;
     });
 
-    it('should throw an error if the database is down', async () => {
-      const authorsBooksForBooksSpy = jest.spyOn(db.authorsBooks, 'bulkCreate');
+    describe('updateAuthorsBooks for books', () => {
+      it('should have been called with args and update authorsBooks for books', async () => {
+        let authorsBooksForBooksSpy;
+        await resetAndMockDB(db => {
+          authorsBooksForBooksSpy = jest.spyOn(db.models.authors_books, 'bulkCreate');
+        });
 
-      const errorMessage = 'database is down';
+        const { updateAuthorsBooksForBooks } = require('../authorsBooks');
+        const res = await updateAuthorsBooksForBooks(updateArgs);
 
-      authorsBooksForBooksSpy.mockImplementationOnce(() => {
-        throw new Error(errorMessage);
+        expect(authorsBooksForBooksSpy).toHaveBeenCalledWith(updateArgs, {
+          fields: ['id', 'bookId', 'authorId'],
+          updateOnDuplicate: ['bookId']
+        });
+        expect(res).toMatchObject({
+          ...updateArgs
+        });
       });
 
-      expect(async () => updateAuthorsBooksForBooks(authorsBooksForBooksArgs)).rejects.toEqual(new Error(errorMessage));
-    });
-  });
+      it('should throw an error if the database is down', async () => {
+        const authorsBooksForBooksSpy = jest.spyOn(db.authorsBooks, 'bulkCreate');
 
-  describe('updateAuthorsBooks for authors', () => {
-    let authorsBooksForAuthorsArgs;
-    beforeEach(() => {
-      authorsBooksForAuthorsArgs = [
-        {
-          bookId: 1,
-          authorId: 1
-        },
-        {
-          bookId: 2,
-          authorId: 1
-        },
-        {
-          bookId: 3,
-          authorId: 2
-        }
-      ];
+        const errorMessage = 'database is down';
+
+        authorsBooksForBooksSpy.mockImplementationOnce(() => {
+          throw new Error(errorMessage);
+        });
+
+        expect(async () => updateAuthorsBooksForBooks(updateArgs)).rejects.toEqual(new Error(errorMessage));
+      });
     });
-    it('should have been called with args and update authorsBooks for authors', async () => {
+
+    describe('updateAuthorsBooks for authors', () => {
       let authorsBooksForAuthorsSpy;
-      await resetAndMockDB(db => {
-        authorsBooksForAuthorsSpy = jest.spyOn(db.models.authors_books, 'bulkCreate');
+
+      it('should have been called with args and update authorsBooks for authors', async () => {
+        await resetAndMockDB(db => {
+          authorsBooksForAuthorsSpy = jest.spyOn(db.models.authors_books, 'bulkCreate');
+        });
+
+        const { updateAuthorsBooksForAuthors } = require('../authorsBooks');
+        const res = await updateAuthorsBooksForAuthors(updateArgs);
+
+        expect(authorsBooksForAuthorsSpy).toHaveBeenCalledWith(updateArgs, {
+          fields: ['id', 'bookId', 'authorId'],
+          updateOnDuplicate: ['authorId']
+        });
+        expect(res).toMatchObject({
+          ...updateArgs
+        });
       });
 
-      const { updateAuthorsBooksForAuthors } = require('../authorsBooks');
-      const res = await updateAuthorsBooksForAuthors(authorsBooksForAuthorsArgs);
+      it('should throw an error if the database is down', async () => {
+        authorsBooksForAuthorsSpy = jest.spyOn(db.authorsBooks, 'bulkCreate');
 
-      expect(authorsBooksForAuthorsSpy).toHaveBeenCalledWith(authorsBooksForAuthorsArgs, {
-        fields: ['id', 'bookId', 'authorId'],
-        updateOnDuplicate: ['authorId']
+        const errorMessage = 'database is down';
+
+        authorsBooksForAuthorsSpy.mockImplementationOnce(() => {
+          throw new Error(errorMessage);
+        });
+
+        expect(async () => updateAuthorsBooksForAuthors(updateArgs)).rejects.toEqual(new Error(errorMessage));
       });
-      expect(res).toMatchObject({
-        ...authorsBooksForAuthorsArgs
-      });
-    });
-
-    it('should throw an error if the database is down', async () => {
-      const authorsBooksForAuthorsSpy = jest.spyOn(db.authorsBooks, 'bulkCreate');
-
-      const errorMessage = 'database is down';
-
-      authorsBooksForAuthorsSpy.mockImplementationOnce(() => {
-        throw new Error(errorMessage);
-      });
-
-      expect(async () => updateAuthorsBooksForAuthors(authorsBooksForAuthorsArgs)).rejects.toEqual(
-        new Error(errorMessage)
-      );
     });
   });
 });

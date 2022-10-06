@@ -5,25 +5,13 @@ import {
   updateBooksLanguagesForBooks,
   updateBooksLanguagesForLanguages
 } from '../booksLanguages';
+import { booksLanguagesArgs } from './mockDaoData';
 
 describe('booksLanguages dao tests', () => {
   describe('createBooksLanguages', () => {
-    let booksLanguagesArgs;
+    let createArgs;
     beforeEach(() => {
-      booksLanguagesArgs = [
-        {
-          bookId: 1,
-          languageId: 1
-        },
-        {
-          bookId: 1,
-          languageId: 2
-        },
-        {
-          bookId: 1,
-          languageId: 3
-        }
-      ];
+      createArgs = booksLanguagesArgs.create;
     });
     it('should insertBooksLanguages called with args and create booksLanguages', async () => {
       let createBooksLanguageSpy;
@@ -34,11 +22,11 @@ describe('booksLanguages dao tests', () => {
 
       const { insertBooksLanguages } = require('../booksLanguages');
 
-      const res = await insertBooksLanguages(booksLanguagesArgs);
+      const res = await insertBooksLanguages(createArgs);
 
-      expect(createBooksLanguageSpy).toHaveBeenCalledWith(booksLanguagesArgs);
+      expect(createBooksLanguageSpy).toHaveBeenCalledWith(createArgs);
       expect(res).toMatchObject({
-        ...booksLanguagesArgs
+        ...createArgs
       });
     });
 
@@ -50,108 +38,78 @@ describe('booksLanguages dao tests', () => {
         throw new Error(errorMessage);
       });
 
-      expect(async () => insertBooksLanguages(booksLanguagesArgs)).rejects.toEqual(new Error(errorMessage));
+      expect(async () => insertBooksLanguages(createArgs)).rejects.toEqual(new Error(errorMessage));
     });
   });
 
-  describe('updateBooksLanguages for books', () => {
-    let booksLanguagesForBooksArgs;
+  describe('updateBooksLanguages', () => {
+    let updateArgs;
     beforeEach(() => {
-      booksLanguagesForBooksArgs = [
-        {
-          bookId: 1,
-          languageId: 1
-        },
-        {
-          bookId: 1,
-          languageId: 2
-        },
-        {
-          bookId: 2,
-          languageId: 3
-        }
-      ];
-    });
-    it('should have been called with args and update booksLanguages for books', async () => {
-      let booksLanguagesForBooksSpy;
-      await resetAndMockDB(db => {
-        booksLanguagesForBooksSpy = jest.spyOn(db.models.books_languages, 'bulkCreate');
-      });
-
-      const { updateBooksLanguagesForBooks } = require('../booksLanguages');
-      const res = await updateBooksLanguagesForBooks(booksLanguagesForBooksArgs);
-
-      expect(booksLanguagesForBooksSpy).toHaveBeenCalledWith(booksLanguagesForBooksArgs, {
-        fields: ['id', 'bookId', 'languageId'],
-        updateOnDuplicate: ['bookId']
-      });
-      expect(res).toMatchObject({
-        ...booksLanguagesForBooksArgs
-      });
+      updateArgs = booksLanguagesArgs.update;
     });
 
-    it('should throw an error if the database is down', async () => {
-      const booksLanguagesForBooksSpy = jest.spyOn(db.booksLanguages, 'bulkCreate');
+    describe('updateBooksLanguages for books', () => {
+      it('should have been called with args and update booksLanguages for books', async () => {
+        let booksLanguagesForBooksSpy;
+        await resetAndMockDB(db => {
+          booksLanguagesForBooksSpy = jest.spyOn(db.models.books_languages, 'bulkCreate');
+        });
 
-      const errorMessage = 'database is down';
+        const { updateBooksLanguagesForBooks } = require('../booksLanguages');
+        const res = await updateBooksLanguagesForBooks(updateArgs);
 
-      booksLanguagesForBooksSpy.mockImplementationOnce(() => {
-        throw new Error(errorMessage);
+        expect(booksLanguagesForBooksSpy).toHaveBeenCalledWith(updateArgs, {
+          fields: ['id', 'bookId', 'languageId'],
+          updateOnDuplicate: ['bookId']
+        });
+        expect(res).toMatchObject({
+          ...updateArgs
+        });
       });
 
-      expect(async () => updateBooksLanguagesForBooks(booksLanguagesForBooksArgs)).rejects.toEqual(
-        new Error(errorMessage)
-      );
-    });
-  });
+      it('should throw an error if the database is down', async () => {
+        const booksLanguagesForBooksSpy = jest.spyOn(db.booksLanguages, 'bulkCreate');
 
-  describe('updateBooksLanguages for languages', () => {
-    let booksLanguagesForLanguagesArgs;
-    beforeEach(() => {
-      booksLanguagesForLanguagesArgs = [
-        {
-          bookId: 1,
-          languageId: 1
-        },
-        {
-          bookId: 2,
-          languageId: 1
-        },
-        {
-          bookId: 3,
-          languageId: 2
-        }
-      ];
+        const errorMessage = 'database is down';
+
+        booksLanguagesForBooksSpy.mockImplementationOnce(() => {
+          throw new Error(errorMessage);
+        });
+
+        expect(async () => updateBooksLanguagesForBooks(updateArgs)).rejects.toEqual(new Error(errorMessage));
+      });
     });
-    it('should have been called with args and update booksLanguages for languages', async () => {
+
+    describe('updateBooksLanguages for languages', () => {
       let booksLanguagesForLanguagesSpy;
-      await resetAndMockDB(db => {
-        booksLanguagesForLanguagesSpy = jest.spyOn(db.models.books_languages, 'bulkCreate');
+
+      it('should have been called with args and update booksLanguages for languages', async () => {
+        await resetAndMockDB(db => {
+          booksLanguagesForLanguagesSpy = jest.spyOn(db.models.books_languages, 'bulkCreate');
+        });
+
+        const { updateBooksLanguagesForLanguages } = require('../booksLanguages');
+        const res = await updateBooksLanguagesForLanguages(updateArgs);
+
+        expect(booksLanguagesForLanguagesSpy).toHaveBeenCalledWith(updateArgs, {
+          fields: ['id', 'bookId', 'languageId'],
+          updateOnDuplicate: ['languageId']
+        });
+        expect(res).toMatchObject({
+          ...updateArgs
+        });
       });
 
-      const { updateBooksLanguagesForLanguages } = require('../booksLanguages');
-      const res = await updateBooksLanguagesForLanguages(booksLanguagesForLanguagesArgs);
+      it('should throw an error if the database is down', async () => {
+        booksLanguagesForLanguagesSpy = jest.spyOn(db.booksLanguages, 'bulkCreate');
+        const errorMessage = 'database is down';
 
-      expect(booksLanguagesForLanguagesSpy).toHaveBeenCalledWith(booksLanguagesForLanguagesArgs, {
-        fields: ['id', 'bookId', 'languageId'],
-        updateOnDuplicate: ['languageId']
+        booksLanguagesForLanguagesSpy.mockImplementationOnce(() => {
+          throw new Error(errorMessage);
+        });
+
+        expect(async () => updateBooksLanguagesForLanguages(updateArgs)).rejects.toEqual(new Error(errorMessage));
       });
-      expect(res).toMatchObject({
-        ...booksLanguagesForLanguagesArgs
-      });
-    });
-
-    it('should throw an error if the database is down', async () => {
-      const booksLanguagesForLanguagesSpy = jest.spyOn(db.booksLanguages, 'bulkCreate');
-      const errorMessage = 'database is down';
-
-      booksLanguagesForLanguagesSpy.mockImplementationOnce(() => {
-        throw new Error(errorMessage);
-      });
-
-      expect(async () => updateBooksLanguagesForLanguages(booksLanguagesForLanguagesArgs)).rejects.toEqual(
-        new Error(errorMessage)
-      );
     });
   });
 });
