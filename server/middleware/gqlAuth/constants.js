@@ -15,7 +15,7 @@ export const RESTRICTED = {
 };
 export const GQL_QUERY_TYPES = {
   query: {
-    whitelist: ['purchasedProduct']
+    whitelist: []
   },
   mutation: {
     whitelist: ['signUp', 'signIn']
