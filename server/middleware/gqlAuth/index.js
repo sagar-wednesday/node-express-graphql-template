@@ -43,6 +43,7 @@ export const isPublicQuery = async req => {
   return queries.every(({ queryName, operationType }) => GQL_QUERY_TYPES[operationType].whitelist.includes(queryName));
 };
 
+// will remove this in next PR
 export const isAuthenticated = async (req, res, next) => {
   try {
     // For accessing graphql without authentication when debugging.
@@ -65,7 +66,7 @@ export const isAuthenticated = async (req, res, next) => {
       next();
     }
   } catch (err) {
-    logger().info('Error in the gqlAuth middleware', err);
+    logger().info('Error in the middleware of gqlAuth', err);
     connect(true);
     sendMessage(JSON.stringify(err.message));
     return res.status(500).send({
