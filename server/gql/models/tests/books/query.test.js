@@ -5,6 +5,9 @@ import { authorsTable, languagesTable, publishersTable, booksTable } from '@util
 describe('Language graphQL-server-DB query tests', () => {
   const bookId = parseInt(booksTable[0].id);
   const publisher = publishersTable[0].name;
+  const language = languagesTable[0].language;
+  const genre = booksTable[0].genres;
+
   const bookOneFromId = `
     query {
         book (id: ${bookId}) {
@@ -52,16 +55,30 @@ describe('Language graphQL-server-DB query tests', () => {
               name
               genres
               pages
-              authors {
+              publishers {
                 edges {
-                  node {
-                    id 
-                    name
-                    age
-                    country
-                  }
+                    node {
+                      id 
+                      name
+                      country
+                    }
                 }
               }
+            }
+          }     
+        }
+    }
+  `;
+
+  const bookOneFromLanguages = `
+    query {
+        books (languages: "${language}") {
+          edges {
+            node {
+              id
+              name
+              genres
+              pages
               languages {
                 edges {
                     node {
@@ -70,22 +87,28 @@ describe('Language graphQL-server-DB query tests', () => {
                     }
                 }
               }
-            publishers {
-              edges {
-                  node {
-                    id 
-                    name
-                    country
-                  }
-              }
-            }
             }
           }     
         }
     }
   `;
 
-  it('should return all the fields related to the book', async () => {
+  const bookOneFromGenres = `
+    query {
+        books (genres: "${genre}") {
+          edges {
+            node {
+              id
+              name
+              genres
+              pages
+            }
+          }     
+        }
+    }
+  `;
+
+  it('should return all the fields of the book to validate the returning values has the right values that are associated with the given bookId', async () => {
     const dbClient = mockDBClient();
     resetAndMockDB(null, {}, dbClient);
     jest.spyOn(dbClient.models.authors, 'findAll').mockImplementation(() => [authorsTable[0]]);
@@ -212,6 +235,50 @@ describe('Language graphQL-server-DB query tests', () => {
               }
             ]
           }
+        }
+      });
+    });
+  });
+
+  it('should request for books with the provided languages', async () => {
+    const dbClient = mockDBClient();
+    resetAndMockDB(null, {}, dbClient);
+    jest.spyOn(dbClient.models.languages, 'findAll').mockImplementation(() => [languagesTable[0]]);
+
+    await getResponse(bookOneFromLanguages).then(response => {
+      expect(get(response, 'body.data.books.edges[0]')).toMatchObject({
+        node: {
+          id: booksTable[0].id,
+          name: booksTable[0].name,
+          genres: booksTable[0].genres,
+          pages: `${booksTable[0].pages}`,
+          languages: {
+            edges: [
+              {
+                node: {
+                  id: languagesTable[0].id,
+                  language: languagesTable[0].language
+                }
+              }
+            ]
+          }
+        }
+      });
+    });
+  });
+
+  it('should request for books with the provided genres', async () => {
+    const dbClient = mockDBClient();
+    resetAndMockDB(null, {}, dbClient);
+    jest.spyOn(dbClient.models.books, 'findAll').mockImplementation(() => [booksTable[0]]);
+
+    await getResponse(bookOneFromGenres).then(response => {
+      expect(get(response, 'body.data.books.edges[0]')).toMatchObject({
+        node: {
+          id: booksTable[0].id,
+          name: booksTable[0].name,
+          genres: booksTable[0].genres,
+          pages: `${booksTable[0].pages}`
         }
       });
     });
