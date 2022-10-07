@@ -67,14 +67,30 @@ describe('Address graphQL-server-DB mutation tests', () => {
     }
   }`;
 
-  it('should have a mutation to create a new book', async () => {
-    const response = await getResponse(createBookMutation);
-    const result = get(response, 'body.data.createBook');
-    expect(result).toMatchObject({
-      id: booksTable[0].id,
-      name: booksTable[0].name,
-      genres: booksTable[0].genres,
-      pages: `${booksTable[0].pages}`
+  describe('create mutation', () => {
+    it('should have a mutation to create a new book', async () => {
+      const response = await getResponse(createBookMutation);
+      const result = get(response, 'body.data.createBook');
+      expect(result).toMatchObject({
+        id: booksTable[0].id,
+        name: booksTable[0].name,
+        genres: booksTable[0].genres,
+        pages: `${booksTable[0].pages}`
+      });
+    });
+
+    it('should throw the error if the database is down', async () => {
+      const errorMessage = 'Unexpected error value: undefined';
+
+      const dbClient = mockDBClient();
+      resetAndMockDB(null, {}, dbClient);
+      jest.spyOn(dbClient.models.books, 'create').mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+      const response = await getResponse(createBookMutation);
+      const result = get(response, 'body.errors[0]');
+
+      expect(result).toEqual(errorMessage);
     });
   });
 

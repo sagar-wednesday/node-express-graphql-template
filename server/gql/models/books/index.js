@@ -147,10 +147,7 @@ export const bookQueries = {
     }
   },
   query: {
-    type: Book,
-    extras: {
-      before: (findOptions, args, context) => addBeforeWhere(findOptions, args, context)
-    }
+    type: Book
   },
   list: {
     ...BookConnection,
