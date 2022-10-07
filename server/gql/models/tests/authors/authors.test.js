@@ -33,7 +33,7 @@ describe('Author introspection tests', () => {
   it('should have the correct fields and types', () => {
     const result = graphqlSync({ schema, source: query });
     const authorFieldTypes = get(result, 'data.__type.fields');
-    const hasCorrectFields = expectSameNameField(authorFieldTypes, fields);
+    const hasCorrectFields = expectSameNameField(authorFieldTypes);
 
     expect(hasCorrectFields).toEqual(expectedFields);
 
