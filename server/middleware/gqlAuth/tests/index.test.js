@@ -159,31 +159,18 @@ describe('gqlAuth tests', () => {
   describe('isPublicQuery tests', () => {
     it('should be able to find out if a query is public or not', async () => {
       const { isPublicQuery } = require('../index');
-      let req = {
+      const req = {
         body: {
-          query: `query address{
-            address(id:1){
+          query: `query author{
+            author(id:1){
               id
             }
           }
           `
         }
       };
-      let response = await isPublicQuery(req);
+      const response = await isPublicQuery(req);
       expect(response).toBe(false);
-
-      req = {
-        body: {
-          query: `query PurchasedProduct{
-            purchasedProduct(id:1){
-              id
-            }
-          }
-          `
-        }
-      };
-      response = await isPublicQuery(req);
-      expect(response).toBe(true);
     });
   });
 });

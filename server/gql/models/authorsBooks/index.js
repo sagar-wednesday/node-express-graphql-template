@@ -5,8 +5,6 @@ import { getQueryFields, TYPE_ATTRIBUTES } from '@server/utils/gqlFieldUtils';
 import { timestamps } from '../timestamps';
 import db from '@database/models';
 import { totalConnectionFields } from '@server/utils';
-import { authorQueries } from '@gql/models/authors';
-import { sequelizedWhere } from '@server/database/dbUtils';
 
 const { nodeInterface } = getNode();
 
@@ -35,12 +33,7 @@ const AuthorsBook = new GraphQLObjectType({
   interfaces: [nodeInterface],
   fields: () => ({
     ...getQueryFields(authorsBookFields, TYPE_ATTRIBUTES.isNonNull),
-    ...timestamps,
-    authors: {
-      ...authorQueries.list,
-      resolve: (sources, args, context, info) =>
-        authorQueries.list.resolve(sources, args, { ...context, book: sources.dataValues }, info)
-    }
+    ...timestamps
   })
 });
 
@@ -53,11 +46,6 @@ const AuthorsBookConnection = createConnection({
   nodeType: AuthorsBook,
   name: 'authorsBooks',
   target: db.authorsBooks,
-  before: (findOptions, args, context) => {
-    findOptions.include = findOptions.include || [];
-    findOptions.where = sequelizedWhere(findOptions.where, args.where);
-    return findOptions;
-  },
   ...totalConnectionFields
 });
 

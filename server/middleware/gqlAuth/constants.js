@@ -1,24 +1,12 @@
-import { logger } from '@utils';
-
 export const RESTRICTED = {
-  query: {
-    purchasedProducts: {
-      // groups: [ "ADMIN", "SUPER_ADMIN", "USER"]
-      isUnauthorized: async (decodedToken, args) => {
-        logger().info(JSON.stringify({ decodedToken, args }));
-        // sample logic to show custom restrictions
-        // only user_id = 1 will be able to access this API
-        return decodedToken?.user?.id !== 1;
-      }
-    }
-  }
+  query: {}
 };
 export const GQL_QUERY_TYPES = {
   query: {
-    whitelist: ['purchasedProduct']
+    whitelist: []
   },
   mutation: {
-    whitelist: ['signUp', 'signIn']
+    whitelist: []
   },
   subscription: { whitelist: [] }
 };

@@ -1,10 +1,6 @@
-import gql from 'graphql-tag';
 import { flatMap } from 'lodash';
-import { isLocalEnv, isTestEnv, logger } from '@utils';
-import { convertToMap } from '@utils/gqlSchemaParsers';
+import { isLocalEnv, isTestEnv } from '@utils';
 import { GQL_QUERY_TYPES } from './constants';
-import { connect } from '@database';
-import { sendMessage } from '@services/slack';
 
 const { parse } = require('graphql');
 
@@ -41,37 +37,6 @@ export const getQueryNames = req => {
 export const isPublicQuery = async req => {
   const queries = getQueryNames(req);
   return queries.every(({ queryName, operationType }) => GQL_QUERY_TYPES[operationType].whitelist.includes(queryName));
-};
-
-export const isAuthenticated = async (req, res, next) => {
-  try {
-    // For accessing graphql without authentication when debugging.
-    if (req.method === 'get') {
-      next();
-      return;
-    }
-    if (isTestEnv() || (await isPublicQuery(req))) {
-      next();
-    } else {
-      let args;
-      const graphQLBody = gql`
-        ${req.body.query}
-      `;
-      if (graphQLBody.definitions?.length && graphQLBody.definitions[0].selectionSet?.selections?.length) {
-        args = convertToMap(graphQLBody.definitions[0].selectionSet.selections[0].arguments, req.body.variables);
-        req.parentArgs = args;
-      }
-
-      next();
-    }
-  } catch (err) {
-    logger().info('Error in the gqlAuth middleware', err);
-    connect(true);
-    sendMessage(JSON.stringify(err.message));
-    return res.status(500).send({
-      errors: [err.message || 'Internal server error']
-    });
-  }
 };
 
 export const handlePreflightRequest = function(req, res, next) {
