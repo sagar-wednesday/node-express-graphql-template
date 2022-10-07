@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import { getResponse } from '@utils/testUtils';
+import { getResponse, mockDBClient, resetAndMockDB } from '@utils/testUtils';
 import { booksTable } from '@utils/testUtils/mockData';
 
 describe('Address graphQL-server-DB mutation tests', () => {
@@ -31,7 +31,7 @@ describe('Address graphQL-server-DB mutation tests', () => {
     }
 `;
 
-  const updateBookMutation = `
+  const updateBookMutationWithAuthorAndLanguages = `
     mutation {
         updateBook (
           id: 1,
@@ -41,6 +41,20 @@ describe('Address graphQL-server-DB mutation tests', () => {
           publisherId: "2",
           authorsId: [{authorId: 2}],
           languagesId: [{languageId: 2}]
+        ) {
+            id
+        }
+    }
+  `;
+
+  const updateBookMutation = `
+    mutation {
+        updateBook (
+          id: 1,
+          name: "Glitter in Sky",
+          genres: "Fantasy",
+          pages: "201",
+          publisherId: "2"
         ) {
             id
         }
@@ -64,12 +78,37 @@ describe('Address graphQL-server-DB mutation tests', () => {
     });
   });
 
-  it('should have a mutation to update a new author', async () => {
-    const response = await getResponse(updateBookMutation);
-    const result = get(response, 'body.data.updateBook');
+  describe('update mutation', () => {
+    it('should have a mutation to update an author with authorsId and languagesId as input', async () => {
+      const response = await getResponse(updateBookMutationWithAuthorAndLanguages);
+      const result = get(response, 'body.data.updateBook');
 
-    expect(result).toMatchObject({
-      id: '1'
+      expect(result).toMatchObject({
+        id: '1'
+      });
+    });
+
+    it('should have a mutation to update an author without authorsId and languagesId as input', async () => {
+      const response = await getResponse(updateBookMutation);
+      const result = get(response, 'body.data.updateBook');
+
+      expect(result).toMatchObject({
+        id: '1'
+      });
+    });
+
+    it('should throw the error if the database is down', async () => {
+      const errorMessage = 'Unexpected error value: undefined';
+
+      const dbClient = mockDBClient();
+      resetAndMockDB(null, {}, dbClient);
+      jest.spyOn(dbClient.models.books, 'update').mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+      const response = await getResponse(updateBookMutation);
+      const result = get(response, 'body.errors[0]');
+
+      expect(result).toEqual(errorMessage);
     });
   });
 
