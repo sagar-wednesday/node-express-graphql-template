@@ -85,12 +85,13 @@ describe('connect', () => {
 
     const { getClient, connect } = require('../../database');
     const client = await getClient();
+
     const error = new Error('failed');
-    client.authenticate = async () => {
-      await expect(connect()).rejects.toEqual(error);
-      jest.spyOn(client, 'authenticate');
-      jest.spyOn(console, 'log');
-      throw error;
-    };
+
+    jest.spyOn(client, 'authenticate').mockImplementation(() => {
+      throw new Error(error);
+    });
+
+    expect(connect()).rejects.toThrowError(new Error(error));
   });
 });

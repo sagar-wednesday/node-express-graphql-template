@@ -58,7 +58,6 @@ const BookConnection = createConnection({
   target: db.books,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
-    findOptions.where = findOptions.where || {};
     findOptions = addBeforeWhere(findOptions, args, context);
 
     if (context?.author?.id) {

@@ -98,7 +98,6 @@ describe('Publisher graphQL-server-DB query tests', () => {
     jest.spyOn(dbClient.models.publishers, 'findAll').mockImplementation(() => [publishersTable[0]]);
 
     await getResponse(publisherOneFromName).then(response => {
-      console.log('publish res', response.body.data.publishers);
       expect(get(response, 'body.data.publishers')).toMatchObject({
         edges: [
           {

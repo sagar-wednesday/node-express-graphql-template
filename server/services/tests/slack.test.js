@@ -16,6 +16,13 @@ describe('Slack tests', () => {
       // eslint-disable-next-line
       expect(res.text).toEqual(`{\"error\":\"${message}\",\"env\":\"test\"}`);
     });
+
+    it('should return the undefined if env is different than production, development, test', async () => {
+      process.env.ENVIRONMENT_NAME = 'local';
+      const res = await sendMessage(message);
+      expect(res).toBeUndefined();
+      process.env.ENVIRONMENT_NAME = 'test';
+    });
   });
   describe('slack error tests', () => {
     it('should send the error', async () => {

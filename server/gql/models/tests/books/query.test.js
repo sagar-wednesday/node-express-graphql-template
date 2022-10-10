@@ -116,7 +116,6 @@ describe('Language graphQL-server-DB query tests', () => {
     jest.spyOn(dbClient.models.publishers, 'findAll').mockImplementation(() => [publishersTable[0]]);
 
     await getResponse(bookOneFromId).then(response => {
-      console.log('response body', response.body);
       expect(get(response, 'body.data.book')).toMatchObject({
         id: booksTable[0].id,
         name: booksTable[0].name,
@@ -167,8 +166,6 @@ describe('Language graphQL-server-DB query tests', () => {
 
     await getResponse(bookOneFromId).then(response => {
       expect(get(response, 'body.data.book')).toBeTruthy();
-
-      console.log('bookOne', get(response, 'body.data.book'));
       // check if authors.findAll is being called once
       expect(dbClient.models.authors.findAll.mock.calls.length).toBe(1);
       // check if authors.findAll is being called with the correct whereclause
