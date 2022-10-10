@@ -59,7 +59,6 @@ const PublisherConnection = createConnection({
 
 const addBeforeWhere = (findOptions, args, context) => {
   args = { ...args, ...context.parentArgs };
-  findOptions.where = findOptions.where || {};
   if (args.name) {
     findOptions.where = {
       ...findOptions.where,

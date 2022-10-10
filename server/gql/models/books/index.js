@@ -98,7 +98,6 @@ const BookConnection = createConnection({
 
 const addBeforeWhere = (findOptions, args, context) => {
   args = { ...args, ...context.parentArgs };
-  findOptions.where = findOptions.where || {};
 
   if (args.publishers) {
     findOptions.include.push({
