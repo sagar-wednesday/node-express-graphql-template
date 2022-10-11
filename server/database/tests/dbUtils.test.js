@@ -1,4 +1,5 @@
 import { deletedId, deleteUsingId, sequelizedWhere, updateUsingId } from '@database/dbUtils';
+import { Op } from 'sequelize';
 
 describe('updateUsingId', () => {
   let mocks;
@@ -117,6 +118,18 @@ describe('sequelizedWhere', () => {
       languages: 'hindi'
     };
     const where = { languages: input.languages };
+    expect(sequelizedWhere(currentWhere, where)).toEqual(input);
+  });
+
+  it('if where args is provided then return the deepMapKeys where args is Op(sequelize) methods', async () => {
+    const currentWhere = {};
+    const operation = 'eq';
+    const input = {
+      [Op[operation]]: {
+        languages: 'hindi'
+      }
+    };
+    const where = { [operation]: { languages: 'hindi' } };
     expect(sequelizedWhere(currentWhere, where)).toEqual(input);
   });
 });

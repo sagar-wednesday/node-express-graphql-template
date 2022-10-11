@@ -4,6 +4,7 @@ import deepMapKeys from 'deep-map-keys';
 
 export const sequelizedWhere = (currentWhere = {}, where = {}) => {
   where = deepMapKeys(where, k => {
+    console.log('print Op[k]', Op[k]);
     if (Op[k]) {
       return Op[k];
     }
