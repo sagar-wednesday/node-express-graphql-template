@@ -1,9 +1,5 @@
 describe('autogenHelper tests', () => {
   it('should throw error if the getMOdelFiles is other than a string', () => {
-    // jest.doMock('path', (...args) => {
-    //   console.log(args);
-    //   return jest.requireActual('path');
-    // });
     function mockPath() {
       const original = jest.requireActual('path');
       return {

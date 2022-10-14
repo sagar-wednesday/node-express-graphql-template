@@ -58,6 +58,13 @@ describe('Book introspection tests', () => {
     expect(authorField.type.kind).toBe('OBJECT');
     expect(authorField.type.name).toBe('AuthorConnection');
   });
+  // it('should not have a authors connection', () => {
+  //   const result = graphqlSync({ schema, source: query, contextValue: false });
+  //   const bookFieldTypes = get(result, 'data.__type.fields');
+  //   const authorField = bookFieldTypes.find(field => field.name === 'authors');
+  //   expect(authorField.type.kind).toBe('OBJECT');
+  //   expect(authorField.type.name).toBe('AuthorConnection');
+  // });
   it('should have a languages connection', () => {
     const result = graphqlSync({ schema, source: query });
     const bookFieldTypes = get(result, 'data.__type.fields');
@@ -65,7 +72,7 @@ describe('Book introspection tests', () => {
     expect(languageField.type.kind).toBe('OBJECT');
     expect(languageField.type.name).toBe('LanguageConnection');
   });
-  it('should have a authors connection', () => {
+  it('should have a publishers connection', () => {
     const result = graphqlSync({ schema, source: query });
     const bookFieldTypes = get(result, 'data.__type.fields');
     const publisherField = bookFieldTypes.find(field => field.name === 'publishers');

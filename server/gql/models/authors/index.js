@@ -42,14 +42,13 @@ const AuthorConnection = createConnection({
   target: db.authors,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
-    if (context?.book?.id) {
-      findOptions.include.push({
-        model: db.authorsBooks,
-        where: {
-          bookId: context.book.id
-        }
-      });
-    }
+
+    findOptions.include.push({
+      model: db.authorsBooks,
+      where: {
+        bookId: context.book.id
+      }
+    });
 
     findOptions.where = sequelizedWhere(findOptions.where, args.where);
 

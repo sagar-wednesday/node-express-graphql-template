@@ -102,6 +102,7 @@ export const booksLanguagesTable = range(1, 10).map((_, index) => ({
 
 export const DB_ENV = {
   POSTGRES_HOST: 'host',
+  POSTGRES_PORT: 5432,
   POSTGRES_USER: 'user',
   POSTGRES_PASSWORD: 'password',
   POSTGRES_DB: 'table'

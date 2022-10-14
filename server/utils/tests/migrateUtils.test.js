@@ -53,4 +53,26 @@ describe('migrationUtils tests', () => {
     };
     expect(await migrate('test_file_name_2', queryInterface)).toBeFalsy();
   });
+
+  it('should have a migrate function that catches a sql error if the migration fails and the error does not starts with the "table"', async () => {
+    const newSqlError = new Error();
+
+    newSqlError.original = {
+      sqlMessage: {
+        startsWith: () => false,
+        endsWith: () => true
+      }
+    };
+
+    const query = jest.fn(() => new Promise((resolve, reject) => reject(newSqlError)));
+    const queryInterface = {
+      sequelize: {
+        query
+      }
+    };
+
+    const { migrate } = jest.requireActual('./../migrateUtils');
+
+    expect(() => migrate('test_file_name_2', queryInterface)).rejects.toThrow(newSqlError);
+  });
 });

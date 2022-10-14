@@ -45,6 +45,17 @@ export const getResponse = async (query, app) => {
     .set('Accept', 'application/json');
 };
 
+export const getReject = async (query, app) => {
+  if (!app) {
+    app = await require('@server').app;
+  }
+  return await request(app)
+    .post('/graphql')
+    .type('form')
+    .send({ query })
+    .set('Accept', 'application/json');
+};
+
 export function mockDBClient(config = { total: 10 }) {
   const SequelizeMock = require('sequelize-mock');
   // Setup the mock database connection

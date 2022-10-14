@@ -46,6 +46,21 @@ describe('Language graphQL-server-DB query tests', () => {
     }
   `;
 
+  const bookOneWithoutArgs = `
+    query {
+      book {
+        id
+        authors {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
+    }
+  `;
+
   const bookOneFromPublishers = `
     query {
         books (publishers: "${publisher}") {
@@ -173,6 +188,21 @@ describe('Language graphQL-server-DB query tests', () => {
       // check if the included model has name: authors_books
       expect(dbClient.models.authors.findAll.mock.calls[0][0].include[0].model.name).toEqual('authors_books');
     });
+  });
+
+  it('should not return book if appropriate args are not provided', async () => {
+    const dbClient = mockDBClient();
+    resetAndMockDB(null, {}, dbClient);
+
+    jest.spyOn(dbClient.models.authors, 'findAll').mockImplementation(() => [authorsTable[1]]);
+
+    console.log('dbClient', dbClient.models.authors.findAll);
+
+    const { getResponse } = jest.requireActual('@utils/testUtils');
+
+    const response = await getResponse(bookOneWithoutArgs);
+
+    expect(get(response, 'body.data.book')).toBeFalsy();
   });
 
   it('should request for languages related to the book', async () => {

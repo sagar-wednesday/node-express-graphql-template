@@ -54,7 +54,10 @@ export const init = async () => {
     graphqlHTTP({
       schema,
       graphiql: true,
-      customFormatErrorFn: e => e
+      customFormatErrorFn: e => {
+        logger().info({ e, msg: e.message });
+        return e;
+      }
     })
   );
 

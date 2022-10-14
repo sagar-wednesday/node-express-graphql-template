@@ -1,4 +1,4 @@
-import { restfulGetResponse, getResponse, resetAndMockDB } from '@utils/testUtils';
+import { restfulGetResponse, getResponse, resetAndMockDB, getReject } from '@utils/testUtils';
 
 const query = `
   query {
@@ -55,6 +55,16 @@ describe('TestApp: Server', () => {
       expect(response.statusCode).toBe(200);
       expect(response.body.data.__schema.queryType.fields[0].name).toBeTruthy();
     });
+  });
+  it('should throw error when providing wrong query to /graphql', async () => {
+    resetAndMockDB();
+    const query = '';
+    await getReject(query).then(response => {
+      expect(response.statusCode).toBe(400);
+      console.log('print res', response);
+      expect(response.body.errors[0].message).toBe('Syntax Error: Unexpected <EOF>.');
+    });
+    // expect(await getResponse(query)).rejects.toThrowError(new Error());
   });
 });
 
