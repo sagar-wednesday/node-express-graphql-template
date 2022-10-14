@@ -196,8 +196,6 @@ describe('Language graphQL-server-DB query tests', () => {
 
     jest.spyOn(dbClient.models.authors, 'findAll').mockImplementation(() => [authorsTable[1]]);
 
-    console.log('dbClient', dbClient.models.authors.findAll);
-
     const { getResponse } = jest.requireActual('@utils/testUtils');
 
     const response = await getResponse(bookOneWithoutArgs);

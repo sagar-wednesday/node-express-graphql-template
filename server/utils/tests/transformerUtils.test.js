@@ -63,7 +63,6 @@ describe('transformerUtils tests', () => {
     it('should transform the array response to raw response ', () => {
       const { transformDbArrayResponseToRawResponse } = require('../transformerUtils');
       const res = transformDbArrayResponseToRawResponse(dbResponse);
-      console.log('response', res);
       expect(res).toEqual(rawResponse);
     });
     it('should throw error if the response passed in argument is not an object', () => {

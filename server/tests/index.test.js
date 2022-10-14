@@ -61,7 +61,6 @@ describe('TestApp: Server', () => {
     const query = '';
     await getReject(query).then(response => {
       expect(response.statusCode).toBe(400);
-      console.log('print res', response);
       expect(response.body.errors[0].message).toBe('Syntax Error: Unexpected <EOF>.');
     });
     // expect(await getResponse(query)).rejects.toThrowError(new Error());
