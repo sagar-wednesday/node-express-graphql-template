@@ -38,7 +38,6 @@ const PublisherConnection = createConnection({
   target: db.publishers,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
-    findOptions.where = findOptions.where || {};
     findOptions = addBeforeWhere(findOptions, args, context);
 
     if (context?.book?.id) {
@@ -59,15 +58,6 @@ const PublisherConnection = createConnection({
 
 const addBeforeWhere = (findOptions, args, context) => {
   args = { ...args, ...context.parentArgs };
-  findOptions.where = findOptions.where || {};
-  if (args.publishers) {
-    findOptions.where = {
-      ...findOptions.where,
-      name: {
-        [Op.iLike]: `%${args.publishers}%`
-      }
-    };
-  }
   if (args.name) {
     findOptions.where = {
       ...findOptions.where,
@@ -92,10 +82,7 @@ export const publisherQueries = {
     }
   },
   query: {
-    type: Publisher,
-    extras: {
-      before: (findOptions, args, context) => addBeforeWhere(findOptions, args, context)
-    }
+    type: Publisher
   },
   list: {
     ...PublisherConnection,

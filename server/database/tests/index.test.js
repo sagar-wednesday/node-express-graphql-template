@@ -9,10 +9,15 @@ describe('getClient', () => {
   });
   it('successfully get DB Client', async () => {
     jest.unmock('@database');
+    process.env.ENVIRONMENT_NAME = 'local';
+    process.env.NODE_ENV = 'local';
     mocks.sequelize = SequelizeMock;
+
     jest.doMock('sequelize', () => mocks.sequelize);
-    jest.spyOn(mocks, 'sequelize');
-    const { getClient } = require('../../database');
+    jest.spyOn(mocks, 'sequelize').mockImplementation();
+    mocks.sequelize.useCLS = jest.fn();
+
+    const { getClient } = jest.requireActual('../../database');
     const client = await getClient();
     await expect(client).toBeInstanceOf(mocks.sequelize);
 
@@ -23,8 +28,9 @@ describe('getClient', () => {
     expect(mocks.sequelize.mock.calls[0][3]).toEqual({
       dialectModule: pg,
       dialect: 'postgres',
+      port: DB_ENV.POSTGRES_PORT,
       host: DB_ENV.POSTGRES_HOST,
-      logging: false,
+      logging: console.log,
       pool: {
         min: 0,
         max: 10,
@@ -85,12 +91,13 @@ describe('connect', () => {
 
     const { getClient, connect } = require('../../database');
     const client = await getClient();
+
     const error = new Error('failed');
-    client.authenticate = async () => {
-      await expect(connect()).rejects.toEqual(error);
-      jest.spyOn(client, 'authenticate');
-      jest.spyOn(console, 'log');
-      throw error;
-    };
+
+    jest.spyOn(client, 'authenticate').mockImplementation(() => {
+      throw new Error(error);
+    });
+
+    expect(connect()).rejects.toThrowError(new Error(error));
   });
 });

@@ -41,14 +41,13 @@ const LanguageConnection = createConnection({
   target: db.languages,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
-    if (context?.book?.id) {
-      findOptions.include.push({
-        model: db.booksLanguages,
-        where: {
-          bookId: context.book.id
-        }
-      });
-    }
+
+    findOptions.include.push({
+      model: db.booksLanguages,
+      where: {
+        bookId: context.book.id
+      }
+    });
 
     findOptions.where = sequelizedWhere(findOptions.where, args.where);
 

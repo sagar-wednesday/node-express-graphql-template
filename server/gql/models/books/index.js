@@ -58,7 +58,6 @@ const BookConnection = createConnection({
   target: db.books,
   before: (findOptions, args, context) => {
     findOptions.include = findOptions.include || [];
-    findOptions.where = findOptions.where || {};
     findOptions = addBeforeWhere(findOptions, args, context);
 
     if (context?.author?.id) {
@@ -98,7 +97,6 @@ const BookConnection = createConnection({
 
 const addBeforeWhere = (findOptions, args, context) => {
   args = { ...args, ...context.parentArgs };
-  findOptions.where = findOptions.where || {};
 
   if (args.publishers) {
     findOptions.include.push({
@@ -147,10 +145,7 @@ export const bookQueries = {
     }
   },
   query: {
-    type: Book,
-    extras: {
-      before: (findOptions, args, context) => addBeforeWhere(findOptions, args, context)
-    }
+    type: Book
   },
   list: {
     ...BookConnection,

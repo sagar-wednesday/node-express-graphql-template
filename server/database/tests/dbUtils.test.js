@@ -1,4 +1,5 @@
-import { deletedId, deleteUsingId, updateUsingId } from '@database/dbUtils';
+import { deletedId, deleteUsingId, sequelizedWhere, updateUsingId } from '@database/dbUtils';
+import { Op } from 'sequelize';
 
 describe('updateUsingId', () => {
   let mocks;
@@ -103,5 +104,32 @@ describe('deleteUsingId', () => {
 describe('deletedId', () => {
   it('returns deletedId GraphQLObject', () => {
     expect(deletedId.name).toEqual('Id');
+  });
+});
+
+describe('sequelizedWhere', () => {
+  it('if no args are given it will return empty object', () => {
+    expect(sequelizedWhere()).toEqual({});
+  });
+
+  it('if where args is provided then return the deepMapKeys where args', async () => {
+    const currentWhere = {};
+    const input = {
+      languages: 'hindi'
+    };
+    const where = { languages: input.languages };
+    expect(sequelizedWhere(currentWhere, where)).toEqual(input);
+  });
+
+  it('if where args is provided then return the deepMapKeys where args is Op(sequelize) methods', async () => {
+    const currentWhere = {};
+    const operation = 'eq';
+    const input = {
+      [Op[operation]]: {
+        languages: 'hindi'
+      }
+    };
+    const where = { [operation]: { languages: 'hindi' } };
+    expect(sequelizedWhere(currentWhere, where)).toEqual(input);
   });
 });

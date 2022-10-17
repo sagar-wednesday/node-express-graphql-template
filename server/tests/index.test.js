@@ -1,4 +1,4 @@
-import { restfulGetResponse, getResponse, resetAndMockDB } from '@utils/testUtils';
+import { restfulGetResponse, getResponse, resetAndMockDB, getReject } from '@utils/testUtils';
 
 const query = `
   query {
@@ -47,6 +47,7 @@ describe('init', () => {
     expect(mocks.db.connect.mock.calls.length).toBe(1);
   });
 });
+
 describe('TestApp: Server', () => {
   it('should respond to /graphql', async () => {
     resetAndMockDB();
@@ -54,6 +55,15 @@ describe('TestApp: Server', () => {
       expect(response.statusCode).toBe(200);
       expect(response.body.data.__schema.queryType.fields[0].name).toBeTruthy();
     });
+  });
+  it('should throw error when providing wrong query to /graphql', async () => {
+    resetAndMockDB();
+    const query = '';
+    await getReject(query).then(response => {
+      expect(response.statusCode).toBe(400);
+      expect(response.body.errors[0].message).toBe('Syntax Error: Unexpected <EOF>.');
+    });
+    // expect(await getResponse(query)).rejects.toThrowError(new Error());
   });
 });
 
@@ -101,4 +111,32 @@ describe('fetchFromGithub', () => {
     expect(axiosSpy).toBeCalled();
     expect(axiosSpy).toBeCalledWith(`https://api.github.com/search/repositories?q=${repo}&per_page=2`);
   });
+});
+
+it('should display number of CPUs, PID etc if is the environment is ', async () => {
+  process.env.ENVIRONMENT_NAME = 'production';
+  process.env.NODE_ENV = 'production';
+  const cluster = require('cluster');
+  const os = require('os');
+  const worker = {
+    process: { pid: 12345 }
+  };
+
+  jest.spyOn(console, 'log');
+  jest.spyOn(cluster, 'fork').mockImplementation(() => {});
+  jest.spyOn(cluster, 'on').mockImplementation((a, b) => {
+    b(worker);
+  });
+  jest.spyOn(os, 'cpus').mockImplementation(() => ({
+    length: 4
+  }));
+
+  jest.mock('../index');
+
+  require('../index');
+
+  expect(console.log.mock.calls[0][0]).toEqual(`Number of CPUs is 4`);
+  process.env.ENVIRONMENT_NAME = 'test';
+  process.env.NODE_ENV = 'test';
+  resetAndMockDB();
 });

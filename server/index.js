@@ -9,7 +9,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
 import axios from 'axios';
 import { newCircuitBreaker } from '@services/circuitbreaker';
-import { isAuthenticated, handlePreflightRequest, corsOptionsDelegate } from '@middleware/gqlAuth';
+import { handlePreflightRequest, corsOptionsDelegate } from '@middleware/gqlAuth';
 import rTracer from 'cls-rtracer';
 import bodyParser from 'body-parser';
 import { connect } from '@database';
@@ -51,11 +51,13 @@ export const init = async () => {
   app.use(
     '/graphql',
     handlePreflightRequest, // handle pre-flight request for graphql endpoint
-    isAuthenticated,
     graphqlHTTP({
       schema,
       graphiql: true,
-      customFormatErrorFn: e => e
+      customFormatErrorFn: e => {
+        logger().info({ e, msg: e.message });
+        return e;
+      }
     })
   );
 
